@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -34,7 +35,7 @@ const authenticateToken = (req, res, next) => {
 
     if (token == null) return res.sendStatus(401);
 
-    jwt.verify(token, 'your_secret_key', (err, user) => { // Replace 'your_secret_key' with a real secret key
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => { // Replace 'your_secret_key' with a real secret key
         if (err) return res.sendStatus(403);
         req.user = user;
         next();
@@ -65,7 +66,7 @@ authRouter.post('/login', async (req, res) => {
             }
         }
 
-        const token = jwt.sign({ uid: userRecord.uid }, 'your_secret_key'); // Replace with a real secret
+        const token = jwt.sign({ uid: userRecord.uid }, process.env.JWT_SECRET_KEY); // Replace with a real secret
         res.status(200).json({ token });
     } catch (error) {
         res.status(500).json({ message: `Error processing login: ${error.message}` });

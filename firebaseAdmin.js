@@ -1,7 +1,12 @@
 const admin = require('firebase-admin');
 
 admin.initializeApp({
-    // The SDK will automatically find the credentials via the environment variable.
+    credential: admin.credential.cert(JSON.parse(
+      Buffer.from(
+        process.env.GOOGLE_APPLICATION_CREDENTIALS,
+        "base64"
+      ).toString("utf8")
+    ))
 });
 
 const db = admin.firestore();
