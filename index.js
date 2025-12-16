@@ -14,6 +14,41 @@ const port = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// Logging Middleware for Requests and Responses
+app.use((req, res, next) => {
+    const startTime = Date.now();
+    
+    console.log(`\n[${new Date().toISOString()}] 📥 REQUEST RECEIVED`);
+    console.log(`   Method: ${req.method}`);
+    console.log(`   Path: ${req.path}`);
+    console.log(`   Query: ${JSON.stringify(req.query)}`);
+    
+    if (Object.keys(req.body).length > 0) {
+        console.log(`   Payload: ${JSON.stringify(req.body, null, 2)}`);
+    }
+    
+    // Capture response
+    const originalSend = res.send;
+    res.send = function(data) {
+        const duration = Date.now() - startTime;
+        console.log(`\n[${new Date().toISOString()}] 📤 RESPONSE SENT`);
+        console.log(`   Status: ${res.statusCode}`);
+        console.log(`   Duration: ${duration}ms`);
+        
+        try {
+            const responseData = typeof data === 'string' ? JSON.parse(data) : data;
+            console.log(`   Body: ${JSON.stringify(responseData, null, 2)}`);
+        } catch (e) {
+            console.log(`   Body: ${data}`);
+        }
+        console.log(`   ${'═'.repeat(60)}`);
+        
+        return originalSend.call(this, data);
+    };
+    
+    next();
+});
+
 // Simple distance calculation helper (Haversine formula)
 const getDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the earth in km
